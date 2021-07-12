@@ -6,18 +6,20 @@
       ```json
       {
         "ok": true,
-        "users": [
-          {
-            "username": "userExample1",
-            "password": "encryptedPassword",
-            "email": "e1@mail.com"
-          },
-          {
-            "username": "userExample2",
-            "password": "encryptedPassword",
-            "email": "e2@mail.com"
-          }
-        ]  
+        "data": {
+          "users": [
+            {
+              "username": "userExample1",
+              "password": "encryptedPassword",
+              "email": "e1@mail.com"
+            },
+            {
+              "username": "userExample2",
+              "password": "encryptedPassword",
+              "email": "e2@mail.com"
+            }
+          ]
+        }
       }
       ```  
      
@@ -34,9 +36,10 @@
       ```json
       {
         "ok": true | false,
-        "username": "string",
-        "message": "user registered succesfully | Error"
-         
+        "data": {
+          "username": "string",
+          "message": "User created successfully | User not created"
+        }
       }
       ```
   - "/user/login": POST: Login a user
@@ -50,15 +53,17 @@
     - response
       ```json
       {
-        "jwt": "token",
-        "ok": true | false
+        "ok": true | false,
+        "data": {
+          "user_token": "token"
+        }
       }
       ```
   - "/user/update": POST: Update a user data
     - request
       ```json
       {
-        "token": "token",
+        "user_token": "token",
         "user": {
           "username": "string",
           "password": "string",
@@ -70,27 +75,30 @@
       ```json
       {
         "ok": true | false,
-        "username": "username",
-        "message": "User updated | Error"
+        "data": {
+          "username": "username",
+          "message": "User updated | Error"
+        }
       }
       ```
   - "/user/{id}": GET: Get a user data
     - request
       ```json
       {
-        "token": "token",
+        "user_token": "token"
       }
       ```
     - response
       ```json
       {
         "ok": true | false,
-        "user": {
-          "username": "string",
-          "password": "string",
-          "email": "e@mail.com"
-        },
-        "message": "User updated | Error"
+        "data": {
+          "user": {
+            "username": "string",
+            "password": "string",
+            "email": "e@mail.com"
+          }
+        }
       }
       ```
 - "/games"

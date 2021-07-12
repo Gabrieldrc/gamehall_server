@@ -32,4 +32,12 @@ public class DefaultResponse {
     public void setDataProperty(String key, Object value) {
         this.data.put(key, value);
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "ok:" + ok +
+                ", data:" + data +
+                '}';
+    }
 }
