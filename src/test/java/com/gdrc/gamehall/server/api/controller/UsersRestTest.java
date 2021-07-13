@@ -1,5 +1,6 @@
 package com.gdrc.gamehall.server.api.controller;
 
+import com.gdrc.gamehall.server.api.security.JWTUtil;
 import com.gdrc.gamehall.server.domain.dto.DefaultResponse;
 import com.gdrc.gamehall.server.domain.model.User;
 import com.gdrc.gamehall.server.domain.service.UserService;
@@ -11,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,9 +32,14 @@ public class UsersRestTest {
     @MockBean
     private UserService service;
 
+    @MockBean
+    private PasswordEncoderUtil encoder;
+
+    @MockBean
+    private JWTUtil tokenizer;
+
     @Test
     public void registerShouldReturnOkTrueWithStatusCreatedAndTheUsernameOfTheUser() throws Exception {
-        User userMock = mock(User.class);
         User user = createUser(0);
         when(service.createUser(any())).thenReturn(true);
 
@@ -57,15 +65,57 @@ public class UsersRestTest {
         ) .andDo(print())
 
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json("{\"ok\":false,\"data\":{\"message\":\"User not created\"}}"));
+                .andExpect(content().json("{\"ok\":false,\"data\":{\"message\":\"User not created\"}}", false));
     }
 
-    private DefaultResponse responseWithOk(boolean ok) {
-        DefaultResponse response = new DefaultResponse();
-        response.setOk(ok);
-        return response;
+    @Test
+    public void loginShouldReturnOkTrueAndStatusOkWithAUserToken() throws Exception {
+        User user = createUser(0);
+        when(service.getUser(any())).thenReturn(Optional.of(user));
+        when(encoder.matches(any(), any())).thenReturn(true);
+        when(tokenizer.generateToken(any())).thenReturn("token_ecrypted");
+
+        this.mockMvc.perform(
+                post(ROUTE+"/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(user.toString())
+        ) .andDo(print())
+
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"ok\":true,\"data\":{\"user_token\":\"token_ecrypted\"}}"));
     }
 
+    @Test
+    public void loginShouldReturnOkFalseAndStatusBadRequestAndAMessageWhenThePasswordIsIncorrect() throws Exception {
+        User user = createUser(0);
+        when(service.getUser(any())).thenReturn(Optional.of(user));
+        when(encoder.matches(any(), any())).thenReturn(false);
+
+        this.mockMvc.perform(
+                post(ROUTE+"/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(user.toString())
+        ) .andDo(print())
+
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("{\"ok\":false,\"data\":{\"message\":\"Error: Incorrect password\"}}"));
+    }
+
+    @Test
+    public void loginShouldReturnOkFalseAndStatusNotFoundAndAMessageWhenTheUserIsNotFound() throws Exception {
+        User user = createUser(0);
+        when(service.getUser(any())).thenReturn(Optional.of(user));
+        when(encoder.matches(any(), any())).thenReturn(false);
+
+        this.mockMvc.perform(
+                post(ROUTE+"/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(user.toString())
+        ) .andDo(print())
+
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("{\"ok\":false,\"data\":{\"message\":\"Error: Incorrect password\"}}"));
+    }
 
     private User createUser(int id) {
         User user = new User();
