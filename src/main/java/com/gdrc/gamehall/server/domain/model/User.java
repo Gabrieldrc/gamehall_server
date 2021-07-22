@@ -1,18 +1,36 @@
 package com.gdrc.gamehall.server.domain.model;
 
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+public class User {
 
-public class User extends SecurityProperties.User {
-
+    private String name;
+    private String password;
     private String email;
-    private boolean passwordEncrypted = false;
+    protected boolean ok;
+
     public User() {}
 
     public User(String name, String password, String email) {
         this.setName(name);
         this.setPassword(password);
-        this.email = email;
+        this.setEmail(email);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 
     public String getEmail() {
         return email;
