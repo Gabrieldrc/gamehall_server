@@ -1,5 +1,7 @@
 package com.gdrc.gamehall.server.domain.service;
 
+import com.gdrc.gamehall.server.domain.exceptions.UserAlreadyExistException;
+import com.gdrc.gamehall.server.domain.exceptions.UserNotFoundException;
 import com.gdrc.gamehall.server.domain.model.User;
 import com.gdrc.gamehall.server.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,22 @@ public class UserService {
         return Optional.empty();
     }
 
-    public User save(User user) {
+    private User save(User user) {
         return this.repository.save(user);
+    }
+
+    public boolean createUser(User user) throws UserAlreadyExistException {
+        if (this.getUser(user).isEmpty()) {
+            this.save(user);
+            return true;
+        }
+        throw new UserAlreadyExistException();
+    }
+
+    public User update(User user) throws UserNotFoundException {
+        if (this.getUser(user).isPresent()) {
+            return this.repository.save(user);
+        }
+        throw new UserNotFoundException();
     }
 }

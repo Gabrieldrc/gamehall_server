@@ -1,8 +1,11 @@
 package com.gdrc.gamehall.server.domain.service;
 
+import com.gdrc.gamehall.server.domain.exceptions.UserAlreadyExistException;
+import com.gdrc.gamehall.server.domain.exceptions.UserNotFoundException;
 import com.gdrc.gamehall.server.domain.model.User;
 import com.gdrc.gamehall.server.domain.repository.UserRepository;
 import com.gdrc.gamehall.server.util.UserTestUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -76,16 +79,61 @@ class UserServiceTest {
     }
 
     @Test
-    public void it_should_save_a_user_and_return_it() {
+    public void it_should_create_a_user() throws UserAlreadyExistException {
         //given
         User user = UserTestUtil.customUser();
         when(userRepository.save(any())).thenReturn(user);
         //when
-        User result = underTest.save(user);
+        boolean result = underTest.createUser(user);
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void it_should_throw_an_exception_if_the_user_already_exists() {
+        //given
+        User user = UserTestUtil.customUser();
+        when(userRepository.save(any())).thenThrow(new Error());
+        when(userRepository.getUserByEmail(any())).thenReturn(Optional.of(user));
+        when(userRepository.getUserByName(any())).thenReturn(Optional.of(user));
+        //when
+        assertThatThrownBy(() -> {
+            underTest.createUser(user);
+        })
+        //then
+        .isInstanceOf(UserAlreadyExistException.class)
+        .hasMessageContaining("User already exists");
+    }
+
+    @Test
+    public void it_should_update_a_user_and_return_the_user() throws UserNotFoundException {
+        //given
+        User user = UserTestUtil.customUser();
+        when(userRepository.save(any())).thenReturn(user);
+        when(userRepository.getUserByEmail(any())).thenReturn(Optional.of(user));
+        when(userRepository.getUserByName(any())).thenReturn(Optional.of(user));
+        //when
+        User result = underTest.update(user);
         //then
         assertThat(result)
-            .hasFieldOrPropertyWithValue("name", user.getName())
-            .hasFieldOrPropertyWithValue("email", user.getEmail());
-        assertThat(result.getPassword().length()).isGreaterThan(0);
+                .hasFieldOrPropertyWithValue("name", user.getName())
+                .hasFieldOrPropertyWithValue("email", user.getEmail())
+                .hasFieldOrPropertyWithValue("password", user.getPassword());
+    }
+
+    @Test
+    public void it_should_throw_an_exception_if_user_does_not_exist() {
+        //given
+        User user = UserTestUtil.customUser();
+        when(userRepository.save(any())).thenReturn(user);
+        when(userRepository.getUserByEmail(any())).thenReturn(Optional.empty());
+        when(userRepository.getUserByName(any())).thenReturn(Optional.empty());
+        //when
+        assertThatThrownBy(() -> {
+            underTest.update(user);
+        })
+        //then
+        .isInstanceOf(UserNotFoundException.class)
+        .hasMessageContaining("User was not found");
     }
 }
