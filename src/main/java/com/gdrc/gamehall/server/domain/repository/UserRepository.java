@@ -12,5 +12,6 @@ public interface UserRepository {
     User save(User user);
     Optional<User> getUserByEmail(String email);
     Optional<User> getUserByName(String name);
-
+    String getUserIdByName(String name);
+    String getUserIdByEmail(String email);
 }

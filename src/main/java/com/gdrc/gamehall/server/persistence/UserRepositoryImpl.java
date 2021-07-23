@@ -34,4 +34,18 @@ public class UserRepositoryImpl implements UserRepository {
         return crudRepository.findByUsername(name)
                 .map(userEntity -> mapper.toUser(userEntity));
     }
+
+    @Override
+    public String getUserIdByName(String name) {
+        return crudRepository.findByUsername(name)
+                .map(userEntity -> userEntity.getId())
+                .orElse("");
+    }
+
+    @Override
+    public String getUserIdByEmail(String email) {
+        return crudRepository.findByEmail(email)
+                .map(userEntity -> userEntity.getId())
+                .orElse("");
+    }
 }

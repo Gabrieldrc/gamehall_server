@@ -136,4 +136,28 @@ class UserServiceTest {
         .isInstanceOf(UserNotFoundException.class)
         .hasMessageContaining("User was not found");
     }
+
+    @Test
+    public void it_should_get_the_user_serial_id() {
+        //given
+        User user = UserTestUtil.customUser();
+        when(userRepository.getUserIdByEmail(any())).thenReturn("serial");
+        when(userRepository.getUserIdByName(any())).thenReturn("serial");
+        //when
+        String result = underTest.getUserId(user);
+        //then
+        assertThat(result).isEqualTo("serial");
+    }
+
+    @Test
+    public void it_should_return_empty_string_if_try_to_get_user_id_that_not_exist() {
+        //given
+        User user = UserTestUtil.customUser();
+        when(userRepository.getUserIdByEmail(any())).thenReturn("");
+        when(userRepository.getUserIdByName(any())).thenReturn("");
+        //when
+        String result = underTest.getUserId(user);
+        //then
+        assertThat(result).isEmpty();
+    }
 }

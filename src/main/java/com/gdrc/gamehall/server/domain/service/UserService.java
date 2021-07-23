@@ -56,4 +56,14 @@ public class UserService {
         }
         throw new UserNotFoundException();
     }
+
+    public String getUserId(User user) {
+        if (!user.getName().isBlank()) {
+            return this.repository.getUserIdByName(user.getName());
+        }
+        if (!user.getEmail().isBlank()) {
+            return this.repository.getUserIdByEmail(user.getEmail());
+        }
+        return "";
+    }
 }
